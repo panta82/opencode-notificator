@@ -1,0 +1,14 @@
+{
+  // Desktop Notifications Plugin Configuration
+  
+  // Enable/disable the entire plugin
+  "enabled": true,
+  
+  // Sound notification settings
+  "playSound": {
+    // Enable/disable sound notifications
+    "enabled": true,
+    // Sound file to play: ding1.mp3, ding2.mp3, ..., ding6.mp3
+    "file": "ding1.mp3"
+  }
+}

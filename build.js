@@ -1,0 +1,42 @@
+import { build as esbuild } from 'esbuild'
+import { readdirSync, statSync, copyFileSync, mkdirSync } from 'fs'
+import { join } from 'path'
+
+async function copyRecursive(src, dest) {
+  const stat = statSync(src)
+
+  if (stat.isDirectory()) {
+    mkdirSync(dest, { recursive: true })
+    const files = readdirSync(src)
+    for (const file of files) {
+      copyRecursive(join(src, file), join(dest, file))
+    }
+  } else {
+    copyFileSync(src, dest)
+  }
+}
+
+async function build() {
+  console.log('Building...')
+
+  await esbuild({
+    entryPoints: ['notification.js'],
+    bundle: true,
+    outfile: 'dist/notification.js',
+    platform: 'node',
+    target: 'node18',
+    format: 'esm',
+    external: ['@opencode-ai/plugin'],
+    sourcemap: true,
+  })
+
+  console.log('Copying sounds...')
+  copyRecursive('sounds', 'dist/sounds')
+
+  console.log('Copying config...')
+  copyFileSync('notification.jsonc', 'dist/notification.jsonc')
+
+  console.log('Build complete! Copy dist/ to your OpenCode plugins directory.')
+}
+
+build().catch(console.error)
