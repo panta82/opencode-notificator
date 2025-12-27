@@ -4,9 +4,10 @@ A plugin for OpenCode that integrates desktop notifications into your workflow.
 
 ## Features
 
-- Notifies you when code generation completes
-- Notifies you when OpenCode requests permissions
-- Optional sound notifications (configurable)
+- Desktop notifications when code generation completes
+- Desktop notifications when OpenCode requests permissions
+- Sound notifications with automatic per-project sound assignment
+- Custom sounds support (drop your own audio files in `sounds/`)
 - Cross-platform support (macOS, Linux)
 
 ## Installation
@@ -58,52 +59,48 @@ Once installed, the plugin will automatically send desktop notifications for:
 
 ## Configuration
 
-The plugin works out of the box with default settings. Notifications are sent for:
-- `session.idle` events
-- `permission.ask` events
+The plugin works out of the box with sensible defaults:
+- Desktop and sound notifications are enabled
+- Each project automatically gets its own unique sound (based on project path)
 
-### Plugin Configuration
+Config file location: `~/.config/opencode/plugin/notification.jsonc`
 
-Edit `notification.jsonc` in your OpenCode plugins directory:
-- Linux/macOS: `~/.config/opencode/plugin/notification.jsonc`
-- Windows: `%APPDATA%\opencode\plugin\notification.jsonc`
+### Default configuration
 
 ```jsonc
 {
-  // Enable/disable the entire plugin
   "enabled": true,
-  
-  // Sound notification settings
   "playSound": {
-    // Enable/disable sound notifications
     "enabled": true,
-    // Sound file to play: ding1.mp3, ding2.mp3, ..., ding6.mp3
+    "fileSeed": 0  // Auto-assigns a sound per project
+  }
+}
+```
+
+By default, the plugin uses `fileSeed` to automatically assign a consistent sound to each project. It hashes `projectPath + seed` to pick from available sounds in the `sounds/` directory. Change the seed value if you want a different sound assignment.
+
+### Use a specific sound file
+
+To use the same sound for all projects:
+
+```jsonc
+{
+  "enabled": true,
+  "playSound": {
+    "enabled": true,
     "file": "ding1.mp3"
   }
 }
 ```
 
-#### Auto-pick sound per project
+Available sounds: `ding1.mp3` through `ding6.mp3`
 
-Instead of manually configuring a sound file, you can use `fileSeed` to automatically assign a consistent sound to each project based on its path:
+### Custom sounds
 
-```jsonc
-{
-  "enabled": true,
-  "playSound": {
-    "enabled": true,
-    "fileSeed": 0
-  }
-}
-```
+Add your own audio files to the `sounds/` directory at `~/.config/opencode/plugin/sounds/`. Supported formats: `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac`, `.flac`. They'll automatically be included in the rotation when using `fileSeed`.
 
-The plugin hashes `projectPath + seed` to pick from available sounds in the `sounds/` directory. Each project gets its own consistent sound without manual configuration. Change the seed value to get a different sound assignment.
+### Disable sound notifications
 
-#### Custom sounds
-
-Add your own sound files to the `sounds/` directory (supports `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac`, `.flac`). They'll automatically be included in the rotation when using `fileSeed`.
-
-To disable only sound notifications:
 ```jsonc
 {
   "enabled": true,
@@ -113,7 +110,8 @@ To disable only sound notifications:
 }
 ```
 
-To disable the entire plugin:
+### Disable the entire plugin
+
 ```jsonc
 {
   "enabled": false
@@ -127,8 +125,9 @@ To disable the entire plugin:
 - Uses built-in `afplay` for audio playback
 
 #### Linux
-- Requires one of: `paplay` (PulseAudio), `aplay` (ALSA), `mpv`, or `ffplay`
-- Most distributions have PulseAudio pre-installed
+- Requires `ffplay` (part of ffmpeg)
+- Install on Ubuntu/Debian: `sudo apt-get install ffmpeg`
+- Install on Fedora: `sudo dnf install ffmpeg`
 
 ## License
 
