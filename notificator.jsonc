@@ -1,8 +1,14 @@
 {
-  // Desktop Notifications Plugin Configuration
+  // Notificator Plugin Configuration
   
   // Enable/disable the entire plugin
   "enabled": true,
+  
+  // Desktop notification settings
+  "showDesktopNotification": {
+    // Enable/disable desktop notifications
+    "enabled": true
+  },
   
   // Sound notification settings
   "playSound": {

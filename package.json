@@ -1,8 +1,8 @@
 {
-  "name": "opencode-desktop-notifications",
+  "name": "opencode-notificator",
   "version": "1.0.0",
   "description": "OpenCode plugin for desktop notifications",
-  "main": "notification.js",
+  "main": "notificator.js",
   "type": "module",
   "scripts": {
     "build": "node build.js",

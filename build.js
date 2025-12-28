@@ -20,9 +20,9 @@ async function build() {
   console.log('Building...')
 
   await esbuild({
-    entryPoints: ['notification.js'],
+    entryPoints: ['notificator.js'],
     bundle: true,
-    outfile: 'dist/notification.js',
+    outfile: 'dist/notificator.js',
     platform: 'node',
     target: 'node18',
     format: 'esm',
@@ -31,10 +31,10 @@ async function build() {
   })
 
   console.log('Copying sounds...')
-  copyRecursive('sounds', 'dist/sounds')
+  copyRecursive('notificator-sounds', 'dist/notificator-sounds')
 
   console.log('Copying config...')
-  copyFileSync('notification.jsonc', 'dist/notification.jsonc')
+  copyFileSync('notificator.jsonc', 'dist/notificator.jsonc')
 
   console.log('Build complete! Copy dist/ to your OpenCode plugins directory.')
 }

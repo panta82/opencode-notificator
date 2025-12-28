@@ -13,12 +13,12 @@ function stripJsonComments(str) {
 
 function loadConfig() {
   try {
-    const configPath = join(__dirname, 'notification.jsonc')
+    const configPath = join(__dirname, 'notificator.jsonc')
     const content = readFileSync(configPath, 'utf-8')
     const stripped = stripJsonComments(content)
     return JSON.parse(stripped)
   } catch (err) {
-    console.error('Failed to load notification.jsonc config:', err.message)
+    console.error('Failed to load notificator.jsonc config:', err.message)
     return {}
   }
 }
@@ -36,7 +36,7 @@ function hashString(str) {
 
 function getSoundFiles() {
   try {
-    const soundsDir = join(__dirname, 'sounds')
+    const soundsDir = join(__dirname, 'notificator-sounds')
     const files = readdirSync(soundsDir)
       .filter(f => /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(f))
       .sort()
@@ -57,6 +57,8 @@ function pickSoundFile(projectPath, seed) {
 export const NotificationPlugin = async ({ project, client, $, directory, worktree }) => {
   const config = loadConfig()
   const enabled = config.enabled !== false
+  const desktopNotificationConfig = config.showDesktopNotification || {}
+  const desktopNotificationEnabled = desktopNotificationConfig.enabled !== false
   const soundConfig = config.playSound || {}
   const soundEnabled = soundConfig.enabled !== false
   
@@ -73,7 +75,7 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   const playNotificationSound = async () => {
     if (!enabled || !soundEnabled) return
     
-    const soundPath = join(__dirname, 'sounds', soundFile)
+    const soundPath = join(__dirname, 'notificator-sounds', soundFile)
     const platform = process.platform
     
     try {
@@ -89,7 +91,7 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   }
 
   const sendNotification = async (title, message) => {
-    if (!enabled) return
+    if (!enabled || !desktopNotificationEnabled) return
     
     const platform = process.platform
 

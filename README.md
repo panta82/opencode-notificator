@@ -1,13 +1,13 @@
-# OpenCode Desktop Notifications Plugin
+# OpenCode Notificator Plugin
 
-A plugin for OpenCode that integrates desktop notifications into your workflow.
+A plugin for OpenCode that integrates desktop notifications and sound alerts into your workflow.
 
 ## Features
 
 - Desktop notifications when code generation completes
 - Desktop notifications when OpenCode requests permissions
 - Sound notifications with automatic per-project sound assignment
-- Custom sounds support (drop your own audio files in `sounds/`)
+- Custom sounds support (drop your own audio files in `notificator-sounds/`)
 - Cross-platform support (macOS, Linux)
 
 ## Installation
@@ -63,13 +63,16 @@ The plugin works out of the box with sensible defaults:
 - Desktop and sound notifications are enabled
 - Each project automatically gets its own unique sound (based on project path)
 
-Config file location: `~/.config/opencode/plugin/notification.jsonc`
+Config file location: `~/.config/opencode/plugin/notificator.jsonc`
 
 ### Default configuration
 
 ```jsonc
 {
   "enabled": true,
+  "showDesktopNotification": {
+    "enabled": true
+  },
   "playSound": {
     "enabled": true,
     "fileSeed": 0  // Auto-assigns a sound per project
@@ -77,7 +80,7 @@ Config file location: `~/.config/opencode/plugin/notification.jsonc`
 }
 ```
 
-By default, the plugin uses `fileSeed` to automatically assign a consistent sound to each project. It hashes `projectPath + seed` to pick from available sounds in the `sounds/` directory. Change the seed value if you want a different sound assignment.
+By default, the plugin uses `fileSeed` to automatically assign a consistent sound to each project. It hashes `projectPath + seed` to pick from available sounds in the `notificator-sounds/` directory. Change the seed value if you want a different sound assignment.
 
 ### Use a specific sound file
 
@@ -86,6 +89,9 @@ To use the same sound for all projects:
 ```jsonc
 {
   "enabled": true,
+  "showDesktopNotification": {
+    "enabled": true
+  },
   "playSound": {
     "enabled": true,
     "file": "ding1.mp3"
@@ -97,15 +103,32 @@ Available sounds: `ding1.mp3` through `ding6.mp3`
 
 ### Custom sounds
 
-Add your own audio files to the `sounds/` directory at `~/.config/opencode/plugin/sounds/`. Supported formats: `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac`, `.flac`. They'll automatically be included in the rotation when using `fileSeed`.
+Add your own audio files to the `notificator-sounds/` directory at `~/.config/opencode/plugin/notificator-sounds/`. Supported formats: `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac`, `.flac`. They'll automatically be included in the rotation when using `fileSeed`.
 
 ### Disable sound notifications
 
 ```jsonc
 {
   "enabled": true,
+  "showDesktopNotification": {
+    "enabled": true
+  },
   "playSound": {
     "enabled": false
+  }
+}
+```
+
+### Disable desktop notifications (keep sounds only)
+
+```jsonc
+{
+  "enabled": true,
+  "showDesktopNotification": {
+    "enabled": false
+  },
+  "playSound": {
+    "enabled": true
   }
 }
 ```
