@@ -54,6 +54,8 @@ function pickSoundFile(projectPath, seed) {
   return soundFiles[index]
 }
 
+let currentSessionID = null
+
 export const NotificationPlugin = async ({ project, client, $, directory, worktree }) => {
   const config = loadConfig()
   const enabled = config.enabled !== false
@@ -62,14 +64,16 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   const soundConfig = config.playSound || {}
   const soundEnabled = soundConfig.enabled !== false
   
-  // Determine sound file: explicit file takes priority, then fileSeed, then default
+  // Determine sound file: explicit file takes priority, then fileSeed, then directory-based with session ID
   let soundFile
   if (soundConfig.file) {
     soundFile = soundConfig.file
   } else if (soundConfig.fileSeed !== undefined) {
     soundFile = pickSoundFile(worktree || directory, soundConfig.fileSeed)
+  } else if (currentSessionID !== null) {
+    soundFile = pickSoundFile(worktree || directory, currentSessionID)
   } else {
-    soundFile = 'ding1.mp3'
+    soundFile = pickSoundFile(worktree || directory, hashString(worktree || directory))
   }
 
   const playNotificationSound = async () => {
@@ -108,6 +112,9 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
 
   return {
     event: async ({ event }) => {
+      if (event.type === "session.created" && event.sessionID) {
+        currentSessionID = event.sessionID
+      }
       if (event.type === "session.idle") {
         await sendNotification("OpenCode", "Generation completed")
         await playNotificationSound()
