@@ -117,7 +117,7 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
       if (event.type === "session.created" && event.sessionID) {
         currentSessionID = event.sessionID
       }
-      if (event.type === "session.idle") {
+      if (event.type === "session.idle" && event.sessionID === currentSessionID) {
         await sendNotification("OpenCode", "Generation completed")
         await playNotificationSound()
       }
