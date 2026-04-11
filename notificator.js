@@ -56,6 +56,16 @@ function pickSoundFile(projectPath, seed) {
 
 let currentSessionID = null
 
+function getEventSessionID(event) {
+  if (!event) return null
+
+  if (event.sessionID) return event.sessionID
+  if (event.properties?.sessionID) return event.properties.sessionID
+  if (event.properties?.info?.id) return event.properties.info.id
+
+  return null
+}
+
 export const NotificationPlugin = async ({ project, client, $, directory, worktree }) => {
   const config = loadConfig()
   const enabled = config.enabled !== false
@@ -114,10 +124,13 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
 
   return {
     event: async ({ event }) => {
-      if (event.type === "session.created" && event.sessionID) {
-        currentSessionID = event.sessionID
+      const eventSessionID = getEventSessionID(event)
+
+      if (event.type === "session.created" && eventSessionID) {
+        currentSessionID = eventSessionID
       }
-      if (event.type === "session.idle" && event.sessionID === currentSessionID) {
+
+      if (event.type === "session.idle" && eventSessionID === currentSessionID) {
         await sendNotification("OpenCode", "Generation completed")
         await playNotificationSound()
       }
