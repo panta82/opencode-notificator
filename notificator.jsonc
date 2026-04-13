@@ -24,5 +24,22 @@
     // This way each project gets its own unique ding without manual config.
     // The seed can be any value - change it to get a different sound assignment.
     "fileSeed": 0
+  },
+  
+  // Text-to-speech settings
+  "textToSpeech": {
+    // Enable/disable text-to-speech announcements
+    "enabled": true,
+    
+    // Custom project name to announce (optional)
+    // If not set, the project directory name is used automatically
+    // e.g. "My API Server" will say "My API Server is done"
+    // "projectName": "My Project",
+    
+    // macOS voice to use (run `say -v ?` to list available voices)
+    "voice": "Samantha",
+    
+    // Speech rate in words per minute (default: 200)
+    "rate": 200
   }
 }

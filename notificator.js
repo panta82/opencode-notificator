@@ -54,6 +54,14 @@ function pickSoundFile(projectPath, seed) {
   return soundFiles[index]
 }
 
+function getProjectName(projectPath) {
+  if (!projectPath) return 'unknown project'
+  // Extract the last directory name and make it human-readable
+  const name = projectPath.split('/').filter(Boolean).pop() || 'unknown project'
+  // Replace hyphens, underscores, dots with spaces for natural speech
+  return name.replace(/[-_.]/g, ' ')
+}
+
 let currentSessionID = null
 
 function getEventSessionID(event) {
@@ -73,17 +81,42 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   const desktopNotificationEnabled = desktopNotificationConfig.enabled !== false
   const soundConfig = config.playSound || {}
   const soundEnabled = soundConfig.enabled !== false
+  const ttsConfig = config.textToSpeech || {}
+  const ttsEnabled = ttsConfig.enabled !== false
+  
+  const projectPath = worktree || directory
+  const projectName = ttsConfig.projectName || getProjectName(projectPath)
+  const ttsVoice = ttsConfig.voice || 'Samantha'
+  const ttsRate = ttsConfig.rate || 200
   
   // Determine sound file: explicit file takes priority, then fileSeed, then directory-based with session ID
   let soundFile
   if (soundConfig.file) {
     soundFile = soundConfig.file
   } else if (soundConfig.fileSeed !== undefined) {
-    soundFile = pickSoundFile(worktree || directory, soundConfig.fileSeed)
+    soundFile = pickSoundFile(projectPath, soundConfig.fileSeed)
   } else if (currentSessionID !== null) {
-    soundFile = pickSoundFile(worktree || directory, currentSessionID)
+    soundFile = pickSoundFile(projectPath, currentSessionID)
   } else {
-    soundFile = pickSoundFile(worktree || directory, hashString(worktree || directory))
+    soundFile = pickSoundFile(projectPath, hashString(projectPath))
+  }
+
+  const speakNotification = async (message) => {
+    if (!enabled || !ttsEnabled) return
+    
+    const platform = process.platform
+    const text = message.replace(/"/g, '\\"')
+    
+    try {
+      if (platform === "darwin") {
+        await $`say -v ${ttsVoice} -r ${String(ttsRate)} "${text}"`.quiet()
+      } else if (platform === "linux") {
+        // espeak is commonly available on Linux
+        await $`espeak -s ${String(ttsRate)} "${text}"`.quiet()
+      }
+    } catch (err) {
+      // Silently fail - TTS is not critical
+    }
   }
 
   const playNotificationSound = async () => {
@@ -133,12 +166,14 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
       if (event.type === "session.idle" && eventSessionID === currentSessionID) {
         await sendNotification("OpenCode", "Generation completed")
         await playNotificationSound()
+        await speakNotification(`${projectName} is done`)
       }
     },
     "permission.ask": async (input, output) => {
       const message = `Permission request: ${input.type}`
       await sendNotification("OpenCode", message)
       await playNotificationSound()
+      await speakNotification(`${projectName} needs permission`)
     },
   }
 }
