@@ -14,6 +14,9 @@
   "playSound": {
     // Enable/disable sound notifications
     "enabled": true,
+
+    // Playback volume as a percentage (0-100)
+    "volume": 50,
     
     // Option 1: Explicit sound file
     // Sound file to play: ding1.mp3, ding2.mp3, ..., ding6.mp3

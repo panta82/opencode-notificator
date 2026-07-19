@@ -73,6 +73,10 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   const desktopNotificationEnabled = desktopNotificationConfig.enabled !== false
   const soundConfig = config.playSound || {}
   const soundEnabled = soundConfig.enabled !== false
+  const configuredVolume = Number(soundConfig.volume ?? 100)
+  const soundVolume = Number.isFinite(configuredVolume)
+    ? Math.min(100, Math.max(0, configuredVolume))
+    : 100
   
   // Determine sound file: explicit file takes priority, then fileSeed, then directory-based with session ID
   let soundFile
@@ -94,10 +98,10 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
     
     try {
       if (platform === "darwin") {
-        await $`afplay "${soundPath}"`.quiet()
+        await $`afplay -v ${soundVolume / 100} ${soundPath}`.quiet()
       } else if (platform === "linux") {
         // ffplay handles MP3 properly and is commonly available via ffmpeg
-        await $`ffplay -nodisp -autoexit -loglevel quiet ${soundPath}`.quiet()
+        await $`ffplay -nodisp -autoexit -loglevel quiet -volume ${soundVolume} ${soundPath}`.quiet()
       }
     } catch (err) {
       // Silently fail - audio is not critical

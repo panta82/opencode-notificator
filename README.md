@@ -75,12 +75,15 @@ Config file location: `~/.config/opencode/plugin/notificator.jsonc`
   },
   "playSound": {
     "enabled": true,
+    "volume": 100, // Playback volume from 0 (silent) to 100 (full)
     "fileSeed": 0  // Auto-assigns a sound per project
   }
 }
 ```
 
 By default, the plugin uses `fileSeed` to automatically assign a consistent sound to each project. It hashes `projectPath + seed` to pick from available sounds in the `notificator-sounds/` directory. Change the seed value if you want a different sound assignment.
+
+Set `playSound.volume` to a percentage from `0` to `100`. Values outside that range are clamped; the default is `100`.
 
 ### Use a specific sound file
 
