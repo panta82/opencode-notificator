@@ -1,9 +1,13 @@
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFileSync, readdirSync } from 'fs'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+const execFileAsync = promisify(execFile)
 
 function stripJsonComments(str) {
   return str
@@ -52,6 +56,14 @@ function pickSoundFile(projectPath, seed) {
   const hash = hashString(input)
   const index = hash % soundFiles.length
   return soundFiles[index]
+}
+
+function getPlatform() {
+  const platform = process.platform
+  if (process.env.WSL_DISTRO_NAME) return 'wsl'
+  if (platform === 'darwin') return 'darwin'
+  if (platform === 'linux') return 'linux'
+  return 'unknown'
 }
 
 let currentSessionID = null
@@ -111,7 +123,7 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
   const sendNotification = async (title, message) => {
     if (!enabled || !desktopNotificationEnabled) return
     
-    const platform = process.platform
+    const platform = getPlatform()
 
     try {
       if (platform === "darwin") {
@@ -120,6 +132,9 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
         await $`osascript -e 'display notification "${escapedMessage}" with title "${escapedTitle}"'`
       } else if (platform === "linux") {
         await $`notify-send ${title} ${message}`
+      }
+      else if (platform === "wsl") {
+        await execFileAsync("wsl-notify-send.exe", ['--category', title, message])
       }
     } catch (err) {
       console.error('Failed to send notification:', err.message)

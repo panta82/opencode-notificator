@@ -57,6 +57,10 @@ Once installed, the plugin will automatically send desktop notifications for:
 - Install on Ubuntu/Debian: `sudo apt-get install libnotify-bin`
 - Install on Fedora: `sudo dnf install libnotify`
 
+### WSL2 (Windows)
+- Requires [wsl-notify-send](https://github.com/stuartleeks/wsl-notify-send)
+- Adding it to $PATH
+
 ## Configuration
 
 The plugin works out of the box with sensible defaults:
