@@ -108,6 +108,8 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
     }
   }
 
+  const iconPath = join(__dirname, 'icon', 'icon.png')
+
   const sendNotification = async (title, message) => {
     if (!enabled || !desktopNotificationEnabled) return
     
@@ -119,7 +121,7 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
         const escapedTitle = title.replace(/'/g, "'\"'\"'")
         await $`osascript -e 'display notification "${escapedMessage}" with title "${escapedTitle}"'`
       } else if (platform === "linux") {
-        await $`notify-send ${title} ${message}`
+        await $`notify-send -a OpenCode -i ${iconPath} ${title} ${message}`
       }
     } catch (err) {
       console.error('Failed to send notification:', err.message)
@@ -135,13 +137,13 @@ export const NotificationPlugin = async ({ project, client, $, directory, worktr
       }
 
       if (event.type === "session.idle" && eventSessionID === currentSessionID) {
-        await sendNotification("OpenCode", "Generation completed")
+        await sendNotification("Completed", "Generation completed")
         await playNotificationSound()
       }
     },
     "permission.ask": async (input, output) => {
       const message = `Permission request: ${input.type}`
-      await sendNotification("OpenCode", message)
+      await sendNotification("Request", message)
       await playNotificationSound()
     },
   }

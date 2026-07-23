@@ -33,6 +33,9 @@ async function build() {
   console.log('Copying sounds...')
   copyRecursive('notificator-sounds', 'dist/notificator-sounds')
 
+  console.log('Copying icon...')
+  copyRecursive('icon', 'dist/icon')
+
   console.log('Copying config...')
   copyFileSync('notificator.jsonc', 'dist/notificator.jsonc')
 
