@@ -6,9 +6,9 @@ import { join } from 'path'
 import { homedir } from 'os'
 
 const PLUGINS_DIR = {
-  linux: join(homedir(), '.config', 'opencode', 'plugin'),
-  darwin: join(homedir(), '.config', 'opencode', 'plugin'),
-  win32: join(process.env.APPDATA || join(homedir(), 'AppData', 'Roaming'), 'opencode', 'plugin')
+  linux: join(homedir(), '.config', 'opencode', 'plugins'),
+  darwin: join(homedir(), '.config', 'opencode', 'plugins'),
+  win32: join(process.env.APPDATA || join(homedir(), 'AppData', 'Roaming'), 'opencode', 'plugins')
 }
 
 function getPluginsDir() {
