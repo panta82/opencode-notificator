@@ -1,159 +1,169 @@
-# OpenCode Notificator Plugin
+# opencode-notificator
 
-A plugin for OpenCode that integrates desktop notifications and sound alerts into your workflow.
+Desktop notifications and sound alerts for **OpenCode V2**.
 
-## Features
+Notifies you when the agent is waiting on you or when a turn ends:
 
-- Desktop notifications when code generation completes
-- Desktop notifications when OpenCode requests permissions
-- Sound notifications with automatic per-project sound assignment
-- Custom sounds support (drop your own audio files in `notificator-sounds/`)
-- Cross-platform support (macOS, Linux)
+| Event | Trigger (V2 event) | Meaning |
+| --- | --- | --- |
+| `done` | `session.idle` / `session.status` (idle) | a turn finished |
+| `question` | `form.created` | the agent asked you a question |
+| `permission` | `permission.asked` | a permission is required |
+| `error` | `session.execution.failed` | a turn failed |
+| `subagent` | idle of a child session | a subagent finished (off by default) |
+| `answered` | `form.replied` / `permission.replied` | you answered (off by default) |
 
-## Installation
+Works even when the terminal is focused, shows rich text (project • session • duration),
+and runs on the OpenCode server so it also covers headless `opencode run` and subagents.
 
-1. Clone or download this repository
+## Install
 
-2. Install dependencies:
-    ```bash
-    npm install
-    ```
+```sh
+# from npm (after publishing)
+opencode plugin add @yasin.herken/opencode-notificator
 
-3. Build the plugin:
-    ```bash
-    npm run build
-    ```
+# or from GitHub
+opencode plugin add github:yasin-herken/opencode-notificator
 
-4. Deploy to OpenCode plugins directory:
-    ```bash
-    npm run deploy
-    ```
+# or locally: drop the folder into one of
+#   ~/.config/opencode/plugins/opencode-notificator/   (global)
+#   .opencode/plugins/opencode-notificator/            (project)
+```
 
-   This automatically:
-   - Builds the plugin
-   - Installs to the correct plugins directory for your platform
-   - Overwrites any existing version
+Then restart if needed:
 
-   Alternatively, use specific commands:
-   ```bash
-   npm run deploy:build    # Build only
-   npm run deploy:install  # Install only (requires dist/ to exist)
-   ```
+```sh
+opencode service restart
+```
 
-## Usage
+That's it — notifications fire automatically. Everything below is optional tuning.
 
-Once installed, the plugin will automatically send desktop notifications for:
-- **Generation completed**: When an OpenCode session goes idle (generation finished)
-- **Permission requests**: When OpenCode asks for permission to perform actions
+## Configure
 
-## Platform-Specific Requirements
+Config is merged in this order (later wins):
 
-### macOS
-- No additional dependencies required
-- Uses built-in `osascript` for notifications
+```
+built-in defaults  <  ./notificator.jsonc  <  "options" in opencode.json
+```
 
-### Linux
-- Requires `notify-send` (part of libnotify)
-- Install on Ubuntu/Debian: `sudo apt-get install libnotify-bin`
-- Install on Fedora: `sudo dnf install libnotify`
+> **When installed from npm/GitHub, use `options`.** The bundled
+> `notificator.jsonc` lives inside the package folder, so editing it is
+> impractical. The jsonc file is only convenient for local/manual installs
+> (where the plugin folder is yours to edit).
 
-## Configuration
-
-The plugin works out of the box with sensible defaults:
-- Desktop and sound notifications are enabled
-- Each project automatically gets its own unique sound (based on project path)
-
-Config file location: `~/.config/opencode/plugin/notificator.jsonc`
-
-### Default configuration
+Add to your `opencode.json` / `opencode.jsonc`:
 
 ```jsonc
 {
-  "enabled": true,
-  "showDesktopNotification": {
-    "enabled": true
-  },
-  "playSound": {
+  "plugins": [
+    {
+      "package": "@yasin.herken/opencode-notificator",
+      "options": {
+        // turn on plugin sounds (off by default)
+        "sound": { "enabled": true, "volume": 0.6 },
+        // skip "done" pings for turns shorter than 10s
+        "minDuration": 10,
+        // notify when subagents finish too
+        "notifyOn": { "subagent": true },
+        // shorter body: drop the project name
+        "showProjectName": false
+      }
+    }
+  ]
+}
+```
+
+### All options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `enabled` | `true` | Master switch for the whole plugin |
+| `notifications.enabled` | `true` | Desktop banners (macOS `osascript`, Linux `notify-send`) |
+| `notifications.title` | `"OpenCode"` | Notification title prefix |
+| `sound.enabled` | `false` | Plugin-owned sounds (off to avoid double sounds with the built-in `attention.sound`) |
+| `sound.volume` | `0.6` | `0`–`1` |
+| `sound.files` | macOS system sounds | Per-event custom file (absolute path or file name) for `done` / `question` / `permission` / `error` / `subagent` |
+| `notifyOn.done` | `true` | A turn finished |
+| `notifyOn.question` | `true` | The agent asked a question |
+| `notifyOn.permission` | `true` | A permission is required |
+| `notifyOn.error` | `true` | A turn failed |
+| `notifyOn.subagent` | `false` | A subagent finished (noisy, off by default) |
+| `notifyOn.answered` | `false` | You answered a question/permission (you are already present, so off by design) |
+| `notifyChildSessions` | `false` | Notify for child sessions on question/permission/error |
+| `minDuration` | `0` | Ignore `done` for turns shorter than this many seconds |
+| `showProjectName` | `true` | Include project name in the body |
+| `showSessionTitle` | `true` | Include session title in the body |
+| `showDuration` | `true` | Include turn duration in the body |
+| `command.enabled` / `command.path` / `command.args` | `false` / `""` / `[]` | Run an external command per event; args support `{event}` `{title}` `{message}` `{project}` |
+| `messages.*` | see jsonc | Custom text per event: `done` `question` `permission` `error` `subagent` `answered` |
+| `debug` | `false` | Log every received event type to `notificator-debug.log` (next to `index.js`) |
+
+### Recipes
+
+Custom sound per event:
+
+```jsonc
+"options": {
+  "sound": {
     "enabled": true,
-    "volume": 100, // Playback volume from 0 (silent) to 100 (full)
-    "fileSeed": 0  // Auto-assigns a sound per project
+    "volume": 0.8,
+    "files": { "done": "/Users/you/Sounds/done.aiff", "error": "/Users/you/Sounds/oops.aiff" }
   }
 }
 ```
 
-By default, the plugin uses `fileSeed` to automatically assign a consistent sound to each project. It hashes `projectPath + seed` to pick from available sounds in the `notificator-sounds/` directory. Change the seed value if you want a different sound assignment.
-
-Set `playSound.volume` to a percentage from `0` to `100`. Values outside that range are clamped; the default is `100`.
-
-### Use a specific sound file
-
-To use the same sound for all projects:
+Only errors and questions, no banners for routine turn ends:
 
 ```jsonc
-{
-  "enabled": true,
-  "showDesktopNotification": {
-    "enabled": true
-  },
-  "playSound": {
+"options": {
+  "notifyOn": { "done": false, "question": true, "permission": true, "error": true }
+}
+```
+
+Fire a custom hook (e.g. ntfy / Home Assistant / osascript) instead of, or next to,
+the built-in output:
+
+```jsonc
+"options": {
+  "notifications": { "enabled": false },
+  "command": {
     "enabled": true,
-    "file": "ding1.mp3"
+    "path": "/usr/local/bin/ntfy",
+    "args": ["pub", "opencode", "{message}"]
   }
 }
 ```
 
-Available sounds: `ding1.mp3` through `ding6.mp3`
-
-### Custom sounds
-
-Add your own audio files to the `notificator-sounds/` directory at `~/.config/opencode/plugin/notificator-sounds/`. Supported formats: `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac`, `.flac`. They'll automatically be included in the rotation when using `fileSeed`.
-
-### Disable sound notifications
+Troubleshooting — log every raw event type the plugin receives:
 
 ```jsonc
-{
-  "enabled": true,
-  "showDesktopNotification": {
-    "enabled": true
-  },
-  "playSound": {
-    "enabled": false
-  }
-}
+"options": { "debug": true }
 ```
 
-### Disable desktop notifications (keep sounds only)
+## Built-in vs this plugin
 
-```jsonc
-{
-  "enabled": true,
-  "showDesktopNotification": {
-    "enabled": false
-  },
-  "playSound": {
-    "enabled": true
-  }
-}
+OpenCode V2 already has built-in alerts in `cli.json`:
+
+```json
+{ "attention": { "notifications": true, "sound": true } }
 ```
 
-### Disable the entire plugin
+Differences: the built-in lives in the **TUI client** and suppresses notification
+banners while the terminal is focused (`when: "blurred"`), with fixed messages.
+This plugin lives in the **server**, is focus-independent, and builds the message
+(project, session title, duration). A common setup is built-in `sound` + this
+plugin's `notifications` to avoid duplicate banners.
 
-```jsonc
-{
-  "enabled": false
-}
+## Development
+
+```sh
+node test-notificator.mjs   # drives synthetic events; you should see banners/sounds
 ```
 
-### Platform-Specific Audio Requirements
+## Requirements
 
-#### macOS
-- No additional dependencies required
-- Uses built-in `afplay` for audio playback
-
-#### Linux
-- Requires `ffplay` (part of ffmpeg)
-- Install on Ubuntu/Debian: `sudo apt-get install ffmpeg`
-- Install on Fedora: `sudo dnf install ffmpeg`
+- macOS (`osascript`, `afplay`) or Linux (`notify-send`, `paplay`)
+- Node 20+
 
 ## License
 
