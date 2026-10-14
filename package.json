@@ -1,27 +1,38 @@
 {
-  "name": "opencode-notificator",
-  "version": "1.0.0",
-  "description": "OpenCode plugin for desktop notifications",
-  "main": "notificator.js",
+  "name": "@yasin.herken/opencode-notificator",
+  "version": "2.0.0",
+  "description": "Desktop notifications and sound alerts for OpenCode V2: when a turn finishes, the agent asks a question, needs permission, or errors.",
   "type": "module",
-  "scripts": {
-    "build": "node build.js",
-    "deploy": "node deploy.js",
-    "deploy:build": "node deploy.js --build-only",
-    "deploy:install": "node deploy.js --install-only"
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js"
   },
+  "files": [
+    "index.js",
+    "notificator.jsonc",
+    "README.md"
+  ],
   "keywords": [
     "opencode",
-    "plugin",
+    "opencode-plugin",
+    "notification",
     "notifications",
-    "desktop"
+    "desktop-notifications",
+    "notificator",
+    "macos",
+    "linux"
   ],
-  "author": "panta82",
-  "license": "MIT",
-  "dependencies": {
-    "@opencode-ai/plugin": "^1.0.203"
+  "engines": {
+    "node": ">=20"
   },
-  "devDependencies": {
-    "esbuild": "^0.20.0"
+  "dependencies": {
+    "@opencode/plugin": "^2.0.24"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yasin-herken/opencode-notificator.git"
   }
 }

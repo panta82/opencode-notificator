@@ -1,31 +1,82 @@
 {
-  // Notificator Plugin Configuration
-  
-  // Enable/disable the entire plugin
-  "enabled": true,
-  
-  // Desktop notification settings
-  "showDesktopNotification": {
-    // Enable/disable desktop notifications
-    "enabled": true
-  },
-  
-  // Sound notification settings
-  "playSound": {
-    // Enable/disable sound notifications
-    "enabled": true,
+  // ===================================================================
+  // opencode-notificator (V2) - configuration
+  // -------------------------------------------------------------------
+  // This file is optional. Delete it to use the built-in defaults.
+  // Comments (// and /* */) are allowed.
+  // Precedence: defaults  <  this file  <  plugin "options" in opencode.json
+  // ===================================================================
 
-    // Playback volume as a percentage (0-100)
-    "volume": 50,
-    
-    // Option 1: Explicit sound file
-    // Sound file to play: ding1.mp3, ding2.mp3, ..., ding6.mp3
-    // "file": "ding1.mp3",
-    
-    // Option 2: Auto-pick based on project (recommended)
-    // Uses a hash of project path + seed to pick a consistent sound per project.
-    // This way each project gets its own unique ding without manual config.
-    // The seed can be any value - change it to get a different sound assignment.
-    "fileSeed": 0
+  // Master switch for the whole plugin.
+  "enabled": true,
+
+  // Desktop notification banners.
+  "notifications": {
+    "enabled": true,
+    // Prefix shown as the notification title (mostly relevant for macOS).
+    "title": "OpenCode"
+  },
+
+  // Sound alerts. The OpenCode built-in "attention.sound" already plays
+  // per-event sounds, so this is OFF by default to avoid double sounds.
+  // Turn it on if you prefer plugin-owned sounds (e.g. custom files).
+  "sound": {
+    "enabled": false,
+    "volume": 0.6,
+    // Optional per-event custom files (absolute path or file name).
+    // Falls back to the built-in macOS system sounds when omitted.
+    "files": {
+      // "done":        "/Users/you/sounds/done.aiff",
+      // "question":    "/Users/you/sounds/question.aiff",
+      // "permission":  "/Users/you/sounds/permission.aiff",
+      // "error":       "/Users/you/sounds/error.aiff",
+      // "subagent":    "/Users/you/sounds/subagent.aiff"
+    }
+  },
+
+  // Which events produce a notification.
+  "notifyOn": {
+    "done": true,
+    "question": true,
+    "permission": true,
+    "error": true,
+    // Subagent (child session) completion. Off by default (noisy).
+    "subagent": false,
+    // Notify when a question/permission is ANSWERED. Off by default:
+    // answering means you are already present (that is why there is no
+    // notification when you reply).
+    "answered": false
+  },
+
+  // Log every received event type to notificator-debug.log (troubleshooting).
+  "debug": false,
+
+  // Notify for child/subagent sessions too.
+  "notifyChildSessions": false,
+
+  // Ignore "done" notifications for turns shorter than this many seconds.
+  "minDuration": 0,
+
+  // What to include in the notification body.
+  "showProjectName": true,
+  "showSessionTitle": true,
+  "showDuration": true,
+
+  // Optional: run an external command for each event.
+  // Placeholders: {event} {message} {title} {project}
+  "command": {
+    "enabled": false,
+    "path": "/path/to/command",
+    "args": ["--event", "{event}", "--message", "{message}"]
+  },
+
+  // Optional message templates. Placeholders: {project} {session} {duration} {action} {resources} {error}
+  "messages": {
+    "done": "Task completed",
+    "question": "A question was asked",
+    "permission": "Permission needed",
+    "error": "An error occurred",
+    "subagent": "Subtask completed",
+    "answered": "Answered"
   }
 }
