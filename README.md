@@ -1,5 +1,7 @@
 # OpenCode Notificator Plugin
 
+> **Archived.** I stopped using this plugin, so it's no longer maintained. The code stays here for reference, and forks are welcome if it's still useful to you.
+
 A plugin for OpenCode that integrates desktop notifications and sound alerts into your workflow.
 
 ## Features
